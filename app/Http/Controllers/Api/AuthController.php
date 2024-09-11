@@ -11,6 +11,7 @@ use App\Models\{User,Translation};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\OrganizationalUser;
 
 class AuthController extends Controller
 {
@@ -156,16 +157,23 @@ class AuthController extends Controller
 
     public function delete($id)
     {
+        // Find the user by ID
         $user = User::find($id);
 
+        // Check if the user exists
         if (!$user) {
             return response()->json(['error' => 'User not found'], 404);
         }
 
+        // Delete corresponding records in the organizational_user table for both as creator and as created user
+        OrganizationalUser::where('user_id', $id)->orWhere('organizational_id', $id)->delete();
+
+        // Now delete the user from the users table
         $user->delete();
 
-        return response()->json(['message' => 'User deleted successfully'], 200);
+        return response()->json(['message' => 'User and related records deleted successfully'], 200);
     }
+
 
     public function getUserData()
     {

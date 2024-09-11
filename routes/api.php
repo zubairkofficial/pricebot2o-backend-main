@@ -81,6 +81,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/addOrganizationalUser',[UserController::class,'addOrganizationalUser']);
     Route::post('/register_user',[UserController::class,'register_user']);
     Route::get('/getOrganizationUsers',[UserController::class,'getOrganizationUsers']);
+    Route::delete('delete_User/{id}', [UserController::class, 'delete_User']);
+
 
 
     // Tool routes

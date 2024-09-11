@@ -18,8 +18,8 @@ class OrganizationalUser extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function organization()
+    public function organizationUsers()
     {
-        return $this->belongsTo(Organization::class, 'organizational_id');
+        return $this->belongsTo(User::class, 'id' );
     }
 }
