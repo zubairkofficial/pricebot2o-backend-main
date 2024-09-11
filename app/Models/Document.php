@@ -17,6 +17,7 @@ class Document extends Model
     protected $fillable = [
         'file_name',
         'data',
+        'user_id'
     ];
 
     /**

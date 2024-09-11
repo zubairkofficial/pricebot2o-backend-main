@@ -27,6 +27,9 @@ class ContractAutomationSolutionController extends Controller
         $file = $request->file('document');
         $doctype = $validated['doctype'];
         $fileName = $file->getClientOriginalName();
+        $userId = $request->input('user_id');
+
+        Log::info("USER ID UPLOADER CAS", [$userId]);
 
         // API URL
         $url = 'https://dhn.services/contract_automation';
@@ -83,7 +86,8 @@ class ContractAutomationSolutionController extends Controller
             ContractSolutions::create([
                 'file_name' => $fileName,
                 'doctype' => $doctype,
-                'data' => base64_encode($responseBody), // Store the binary data as a base64 encoded string
+                'data' => base64_encode($responseBody),
+                // 'user_id'=> $userId, // Store the binary data as a base64 encoded string
             ]);
 
             // Create a new Word document if the response is not binary
