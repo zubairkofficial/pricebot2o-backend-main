@@ -55,7 +55,18 @@ class User extends Authenticatable
         return $this->hasMany(OrganizationalUser::class,'organization_id');
     }
 
-    
+    public function documents(){
+        return $this->hasMany(Document::class , 'user_id');
+    }
+
+    public function contractSolutions(){
+        return $this->hasMany(ContractSolutions::class , 'user_id');
+    }
+
+    public function dataprocesses(){
+        return $this->hasMany(DataProcess::class , 'user_id');
+    }
+
 
 
 }

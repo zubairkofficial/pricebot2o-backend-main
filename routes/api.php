@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\ToolController;
 use App\Http\Controllers\Api\VoiceController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UsageController;
 use Illuminate\Support\Facades\Route;
 
 // Auth Routes
@@ -31,6 +32,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::delete('delete/{id}', [AuthController::class, 'delete']);
     Route::get('/getUserData', [AuthController::class, 'getUserData']);
     Route::get('dashboardInfo', [AdminController::class, 'dashboardInfo']);
+
+    // User Usage Routes
+    Route::get('/user/{id}/document-count', [UsageController::class, 'getUserDocumentCount']);
 
     // Service Routes
     Route::get('all-services', [ServiceController::class, 'allServices']);
@@ -82,6 +86,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/register_user',[UserController::class,'register_user']);
     Route::get('/getOrganizationUsers',[UserController::class,'getOrganizationUsers']);
     Route::delete('delete_User/{id}', [UserController::class, 'delete_User']);
+    Route::get('/getOrganizationalUserss', [AuthController::class, 'getOrganizationalUserss']);
 
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DataProcess;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -19,12 +20,13 @@ class DataProcessController extends Controller
             'documents' => 'required|array',
             'documents.*' => 'file',
         ]);
-
+        $userId = $request->input('user_id');
         $responses = [];
 
         foreach ($request->file('documents') as $file) {
             $fileName = $file->getClientOriginalName();
             $url = 'https://dhn.services/datasheet_process';
+
 
             $username = 'api_user';
             $password = 'g*f>G31B=9D7';
@@ -59,6 +61,12 @@ class DataProcessController extends Controller
                     // Get the response body
                     $responseData = json_decode($response->getBody(), true);
 
+                    DataProcess::create([
+                        'file_name' => $fileName,
+                        'data' => base64_encode(json_encode($responseData)),
+                        'user_id'=> $userId,
+                    ]);
+
                     $responses[] =  $responseData;
                 } else {
                     return response()->json(['message' => 'Failed to upload file', 'error' => 'Unexpected status code'], $response->getStatusCode());
@@ -69,7 +77,6 @@ class DataProcessController extends Controller
                 return response()->json(['message' => 'Failed to upload file', 'error' => $errorResponse], $e->getCode() ?: 400);
             }
         }
-
         // Return a successful response with the combined data
         return response()->json(['message' => 'Files processed successfully', 'data' => $responses]);
     }

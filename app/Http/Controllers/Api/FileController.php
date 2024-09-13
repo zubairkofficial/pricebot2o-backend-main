@@ -68,7 +68,6 @@ class FileController extends Controller
                     'file_name' => $fileName,
                     'data' => json_encode($responseData),
                     'user_id'=> $userId                // Ensure data is encoded if it's JSON
-
                 ]);
 
                 // Return a successful response with the data

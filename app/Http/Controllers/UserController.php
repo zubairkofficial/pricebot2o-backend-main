@@ -20,7 +20,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email',
             'password' => 'required|min:8',
-            'services' => 'required|array',
+            'services' => 'nullable|array',
             'is_user_organizational' => 'nullable|boolean',
             'creator_id' => 'nullable|exists:users,id',
         ]);

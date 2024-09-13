@@ -86,8 +86,8 @@ class ContractAutomationSolutionController extends Controller
             ContractSolutions::create([
                 'file_name' => $fileName,
                 'doctype' => $doctype,
-                'data' => base64_encode($responseBody),
-                // 'user_id'=> $userId, // Store the binary data as a base64 encoded string
+                'data' => base64_encode(json_encode($responseBody)),
+                'user_id'=> $userId, // Store the binary data as a base64 encoded string
             ]);
 
             // Create a new Word document if the response is not binary

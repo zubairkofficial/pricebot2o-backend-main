@@ -194,4 +194,12 @@ class AuthController extends Controller
 
         ]);
     }
+
+    public function getOrganizationalUserss() {
+        // Assuming 'is_user_organizational' is a boolean field
+        $users = User::where('is_user_organizational', true)->get();
+
+        return $users;
+    }
+
 }

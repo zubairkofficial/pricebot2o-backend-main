@@ -28,4 +28,8 @@ class Document extends Model
     protected $casts = [
         'data' => 'array',
     ];
+
+    public function Documents(){
+        return $this->belongsTo(User::class , 'id');
+    }
 }
