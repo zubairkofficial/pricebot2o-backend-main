@@ -125,6 +125,7 @@ class AuthController extends Controller
 
         $user = User::findOrFail($id);
 
+        // Update parent user fields
         if ($request->has('name')) {
             $user->name = $request->name;
         }
@@ -143,8 +144,30 @@ class AuthController extends Controller
 
         $user->save();
 
-        return response()->json(['message' => 'User updated successfully', $user]);
+        // Update child organizational users
+        // Fetch the IDs of the child organizational users
+        $childUserIds = OrganizationalUser::where('user_id', $user->id)->pluck('organizational_id');
+
+        // Fetch the child users
+        $childUsers = User::whereIn('id', $childUserIds)->get();
+
+        // Update each child user
+        foreach ($childUsers as $childUser) {
+            // You can choose which fields to update for the child users
+            // For example, update services and org_id to match the parent user
+            if ($request->has('services')) {
+                $childUser->services = $request->services;
+            }
+            if ($request->has('org_id')) {
+                $childUser->org_id = $request->org_id;
+            }
+            // Optionally, update other fields as needed
+            $childUser->save();
+        }
+
+        return response()->json(['message' => 'User and child organizational users updated successfully', 'user' => $user]);
     }
+
 
     public function logout(Request $request)
     {
@@ -192,14 +215,46 @@ class AuthController extends Controller
             'email' => $user->email,
             'send_email' => $user->send_email,
 
+
         ]);
     }
 
-    public function getOrganizationalUserss() {
-        // Assuming 'is_user_organizational' is a boolean field
-        $users = User::where('is_user_organizational', true)->get();
+    public function getAllOrganizationalUsers()
+    {
+        // Fetch all users who are organizational users (i.e., 'is_user_organizational' is true)
+        $usersInOrganization = User::where('is_user_organizational', true)->get();
 
-        return $users;
+        // Get the service IDs from the users (assuming 'services' field contains service IDs)
+        $serviceIds = $usersInOrganization->pluck('services')->flatten()->unique();
+
+        // Fetch service names based on service IDs
+        $serviceNames = Service::whereIn('id', $serviceIds)->pluck('name', 'id');
+
+        // Fetch organization names for each user based on their 'org_id'
+        $orgIds = $usersInOrganization->pluck('org_id')->unique();
+        $organizationNames = Organization::whereIn('id', $orgIds)->pluck('name', 'id');
+
+        // Map the users and replace the service IDs with service names and include organization names
+        $usersWithServiceNames = $usersInOrganization->map(function ($user) use ($serviceNames, $organizationNames) {
+            // Get the service names for the user
+            $userServiceNames = collect($user->services)->map(function ($serviceId) use ($serviceNames) {
+                return $serviceNames->get($serviceId);
+            });
+
+            // Return the user data with service names and organization name
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'services' => $userServiceNames,
+                'organization_name' => $organizationNames->get($user->org_id),
+            ];
+        });
+
+        // Return the organizational users with service names and organization names
+        return response()->json([
+            'organization_users' => $usersWithServiceNames,
+        ], 200);
     }
 
 }

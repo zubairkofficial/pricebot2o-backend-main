@@ -62,10 +62,6 @@ class UserController extends Controller
     }
 
 
-
-
-
-
     public function getOrganizationUsers(Request $request)
 {
     // Get the authenticated user (the user who has created other users)
@@ -115,6 +111,53 @@ class UserController extends Controller
 
     // Log the full list of created users with service names and organization names
     Log::info('Users created by this user:', ['created_users' => $usersWithServiceNames]);
+
+    // Return the created users with service names and organization names
+    return response()->json([
+        'organization_users' => $usersWithServiceNames,
+    ], 200);
+}
+public function getOrganizationUsers2($userId)
+{
+    // Fetch all the records from organizational_user where user_id is the provided userId
+    $createdUsers = OrganizationalUser::where('user_id', $userId)->pluck('organizational_id');
+
+    // If the user has not created any other users
+    if ($createdUsers->isEmpty()) {
+        return response()->json([
+            'message' => 'This user has not created any other users.'
+        ], 200);
+    }
+
+    // Fetch the user details for the users created by this user
+    $usersInOrganization = User::whereIn('id', $createdUsers)->get();
+
+    // Get the service IDs from the users
+    $serviceIds = $usersInOrganization->pluck('services')->flatten();
+
+    // Fetch service names based on service IDs
+    $serviceNames = Service::whereIn('id', $serviceIds)->pluck('name', 'id');
+
+    // Fetch organization names for each user based on org_id
+    $orgIds = $usersInOrganization->pluck('org_id');
+    $organizationNames = Organization::whereIn('id', $orgIds)->pluck('name', 'id');
+
+    // Map the users and replace the service IDs with service names and include organization names
+    $usersWithServiceNames = $usersInOrganization->map(function ($user) use ($serviceNames, $organizationNames) {
+        // Get the service names for the user
+        $userServiceNames = collect($user->services)->map(function ($serviceId) use ($serviceNames) {
+            return $serviceNames->get($serviceId);
+        });
+
+        // Return the user data with service names and organization name
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'services' => $userServiceNames,
+            'organization_name' => $organizationNames->get($user->org_id),
+        ];
+    });
 
     // Return the created users with service names and organization names
     return response()->json([

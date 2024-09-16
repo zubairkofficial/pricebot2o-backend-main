@@ -51,6 +51,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Organization::class,'id' , 'org_id');
     }
+    public function services() {
+        return $this->belongsToMany(Service::class);
+    }
+
     public function organizationUsers():HasMany{
         return $this->hasMany(OrganizationalUser::class,'organization_id');
     }

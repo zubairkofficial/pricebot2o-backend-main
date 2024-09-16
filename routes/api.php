@@ -84,9 +84,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::post('/addOrganizationalUser',[UserController::class,'addOrganizationalUser']);
     Route::post('/register_user',[UserController::class,'register_user']);
-    Route::get('/getOrganizationUsers',[UserController::class,'getOrganizationUsers']);
+    Route::get('/getOrganizationUsers',action: [UserController::class,'getOrganizationUsers']);
     Route::delete('delete_User/{id}', [UserController::class, 'delete_User']);
-    Route::get('/getOrganizationalUserss', [AuthController::class, 'getOrganizationalUserss']);
+    Route::get('/getAllOrganizationalUsers', [AuthController::class, 'getAllOrganizationalUsers']);
+    Route::get('/getOrganizationUsers2/{id}',action: [UserController::class,'getOrganizationUsers2']);
 
 
 
