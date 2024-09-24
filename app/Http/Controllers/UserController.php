@@ -62,6 +62,7 @@ class UserController extends Controller
     }
 
 
+   
     public function getOrganizationUsers(Request $request)
 {
     // Get the authenticated user (the user who has created other users)
@@ -164,8 +165,6 @@ public function getOrganizationUsers2($userId)
         'organization_users' => $usersWithServiceNames,
     ], 200);
 }
-
-
 public function delete_User($id)
 {
     // Find the user by ID
