@@ -27,20 +27,37 @@ class UsageController extends Controller
             ], 404);
         }
 
-        // Count the documents associated with the user
-        $documentCount = $user->documents()->count();
+        // Fetch the services or tools the user has access to
+        // Assuming `services` is an array or collection containing the tool access info
+        $userServices = $user->services; // Adjust according to your actual implementation
 
-        // Count the contract solutions associated with the user
-        $contractSolutionCount = $user->contractSolutions()->count();
+        // Initialize the response data array
+        $responseData = [
+            'user_id' => $user->id
+        ];
 
-        $dataProcessCount = $user->dataprocesses()->count();
+        // Check if the user has access to the document tool
+        if (in_array('1', $userServices)) {
+            // Count the documents associated with the user
+            $documentCount = $user->documents()->count();
+            $responseData['document_count'] = $documentCount;
+        }
 
-        // Return the count along with user ID
-        return response()->json([
-            'user_id' => $user->id,
-            'document_count' => $documentCount,
-            'contract_solution_count' => $contractSolutionCount,
-            'data_process_count' => $dataProcessCount,
-        ]);
+        // Check if the user has access to the contract solution tool
+        if (in_array('3', $userServices)) {
+            // Count the contract solutions associated with the user
+            $contractSolutionCount = $user->contractSolutions()->count();
+            $responseData['contract_solution_count'] = $contractSolutionCount;
+        }
+
+        // Check if the user has access to the data process tool
+        if (in_array('4', $userServices)) {
+            // Count the data processes associated with the user
+            $dataProcessCount = $user->dataprocesses()->count();
+            $responseData['data_process_count'] = $dataProcessCount;
+        }
+
+        // Return the filtered usage data based on available tools
+        return response()->json($responseData);
     }
 }

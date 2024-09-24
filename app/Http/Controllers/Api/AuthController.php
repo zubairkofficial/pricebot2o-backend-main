@@ -227,27 +227,33 @@ class AuthController extends Controller
         // Get the service IDs from the users (assuming 'services' field contains service IDs)
         $serviceIds = $usersInOrganization->pluck('services')->flatten()->unique();
 
-        // Fetch service names based on service IDs
-        $serviceNames = Service::whereIn('id', $serviceIds)->pluck('name', 'id');
+        // Fetch services based on service IDs, retrieving both id and name
+        $services = Service::whereIn('id', $serviceIds)->pluck('name', 'id');
 
-        // Fetch organization names for each user based on their 'org_id'
+        // Fetch organization names and ids for each user based on their 'org_id'
         $orgIds = $usersInOrganization->pluck('org_id')->unique();
-        $organizationNames = Organization::whereIn('id', $orgIds)->pluck('name', 'id');
+        $organizations = Organization::whereIn('id', $orgIds)->pluck('name', 'id');
 
         // Map the users and replace the service IDs with service names and include organization names
-        $usersWithServiceNames = $usersInOrganization->map(function ($user) use ($serviceNames, $organizationNames) {
-            // Get the service names for the user
-            $userServiceNames = collect($user->services)->map(function ($serviceId) use ($serviceNames) {
-                return $serviceNames->get($serviceId);
+        $usersWithServiceNames = $usersInOrganization->map(function ($user) use ($services, $organizations) {
+            // Get the service names and ids for the user
+            $userServices = collect($user->services)->map(function ($serviceId) use ($services) {
+                return [
+                    'id' => $serviceId,
+                    'name' => $services->get($serviceId),
+                ];
             });
 
-            // Return the user data with service names and organization name
+            // Return the user data with service names and organization name and id
             return [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'services' => $userServiceNames,
-                'organization_name' => $organizationNames->get($user->org_id),
+                'services' => $userServices,
+                'organization' => [
+                    'id' => $user->org_id,
+                    'name' => $organizations->get($user->org_id),
+                ],
             ];
         });
 
