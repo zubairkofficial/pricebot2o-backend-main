@@ -143,12 +143,8 @@ class UserController extends Controller
     }
 
 
-<<<<<<< HEAD
 
 
-=======
-   
->>>>>>> dc736167b809d20449f091445fc9acc4c73b234c
     public function getOrganizationUsers(Request $request)
     {
         // Get the authenticated user (the user who has created other users)
@@ -296,36 +292,10 @@ class UserController extends Controller
             ];
         });
 
-<<<<<<< HEAD
         // Return the normal users with service names and organization names
         return response()->json([
             'normal_users' => $usersWithServiceNames,
         ], 200);
-=======
-        // Return the user data with service names and organization name
-        return [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'services' => $userServiceNames,
-            'organization_name' => $organizationNames->get($user->org_id),
-        ];
-    });
-
-    // Return the created users with service names and organization names
-    return response()->json([
-        'organization_users' => $usersWithServiceNames,
-    ], 200);
-}
-public function delete_User($id)
-{
-    // Find the user by ID
-    $user = User::find($id);
-
-    // Check if the user exists
-    if (!$user) {
-        return response()->json(['error' => 'User not found'], 404);
->>>>>>> dc736167b809d20449f091445fc9acc4c73b234c
     }
 
     public function delete_User($id)
