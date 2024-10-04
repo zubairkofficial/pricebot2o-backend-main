@@ -32,7 +32,7 @@ class ContractAutomationSolutionController extends Controller
         Log::info("USER ID UPLOADER CAS", [$userId]);
 
         // API URL
-        $url = 'https://dhn.services/contract_automation';
+        $url = 'http://dhn.services/contract_automation';
 
         // Static credentials
         $username = 'api_user';

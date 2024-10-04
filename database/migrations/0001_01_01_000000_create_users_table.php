@@ -21,6 +21,7 @@ return new class extends Migration
             $table->json('services')->nullable();
             $table->string('org_id')->nullable();
             $table->boolean('is_user_organizational')->nullable();
+        
             $table->rememberToken();
             $table->timestamps();
         });

@@ -23,7 +23,8 @@ class User extends Authenticatable
         'password',
         'services',
         'org_id',
-        'is_user_organizational'
+        'is_user_organizational',
+        'is_user_customer'
     ];
 
     /**
@@ -49,28 +50,40 @@ class User extends Authenticatable
 
     public function organization()
     {
-        return $this->hasOne(Organization::class,'id' , 'org_id');
+        return $this->hasOne(Organization::class, 'id', 'org_id');
     }
-    public function services() {
-        return $this->belongsToMany(Service::class);
-    }
-
-    public function organizationUsers():HasMany{
-        return $this->hasMany(OrganizationalUser::class,'organization_id');
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'services');
     }
 
-    public function documents(){
-        return $this->hasMany(Document::class , 'user_id');
+    public function organizationUsers(): HasMany
+    {
+        return $this->hasMany(OrganizationalUser::class, 'organization_id');
     }
 
-    public function contractSolutions(){
-        return $this->hasMany(ContractSolutions::class , 'user_id');
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'user_id');
     }
 
-    public function dataprocesses(){
-        return $this->hasMany(DataProcess::class , 'user_id');
+    public function contractSolutions()
+    {
+        return $this->hasMany(ContractSolutions::class, 'user_id');
     }
 
+    public function dataprocesses()
+    {
+        return $this->hasMany(DataProcess::class, 'user_id');
+    }
 
-
+    public function customerUsers()
+    {
+        return $this->hasMany(OrganizationalUser::class, 'customer_id')->with('organizational');
+    }
+    public function customerUserWithNullOrganization()
+    {
+        return $this->hasOne(OrganizationalUser::class, 'customer_id')
+            ->whereNull('organizational_id');
+    }
 }
