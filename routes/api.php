@@ -16,14 +16,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsageController;
 use App\Http\Controllers\CustomerAdminController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\ApiKeyController;
 // Auth Routes
 Route::prefix('auth')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
     Route::post('register-customer', [AuthController::class, 'registerCustomer']);
     Route::post('register-customer-admin', [AuthController::class, 'registerCustomerByAdmin']);
-
+    Route::post('link-users', [AuthController::class, 'linkUsers']);
 
 });
 
@@ -49,9 +49,18 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/getUserData', [AuthController::class, 'getUserData']);
     Route::get('/getNonOrganizationalUsers', [AuthController::class, 'getNonOrganizationalUsers']);
     Route::get('dashboardInfo', [AdminController::class, 'dashboardInfo']);
-    Route::get('/customer-requests', [CustomerRequestController::class, 'getRequests']);
-    Route::post('/customer-requests/{id}/approve', [CustomerRequestController::class, 'approveRequest']);
-    Route::post('/customer-requests/{id}/decline', [CustomerRequestController::class, 'declineRequest']);
+
+    //API SETTINGS ROUTES
+    Route::post('/add-model', [ApiKeyController::class, 'addModel']);
+    Route::post('/save-api-key', [ApiKeyController::class, 'store']);  // Existing route to save API key
+    Route::get('/api-key/{id}', [ApiKeyController::class, 'show']);
+    Route::get('/api-models', [ApiKeyController::class, 'apiModels']);
+    Route::get('/api-keys', [ApiKeyController::class, 'getApiKeys']);
+
+
+    // Route::get('/customer-requests', [CustomerRequestController::class, 'getRequests']);
+    // Route::post('/customer-requests/{id}/approve', [CustomerRequestController::class, 'approveRequest']);
+    // Route::post('/customer-requests/{id}/decline', [CustomerRequestController::class, 'declineRequest']);
     // User Usage Routes
     Route::get('/user/{id}/document-count', [UsageController::class, 'getUserDocumentCount']);
 
@@ -89,7 +98,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::post('/uploadFile', [FileController::class, 'uploadFile']);
 
-// Contract automation
+    // Contract automation
     Route::post('/contract-automation', [ContractAutomationSolutionController::class, 'fetchContractAutomation']);
 
     // DataProcess

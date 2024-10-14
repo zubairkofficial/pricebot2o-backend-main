@@ -28,7 +28,7 @@ class FileController extends Controller
         Log::info("USER ID ", [$userId]);
 
         // API URL
-        $url = 'http://dhn.services/sthamer/datasheet_process';
+        $url = 'http://20.218.155.138/sthamer/datasheet_process';
 
         // Static credentials
         $username = 'api_user';

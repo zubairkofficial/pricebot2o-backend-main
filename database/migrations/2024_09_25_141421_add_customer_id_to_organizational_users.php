@@ -11,10 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('organizational_user', function (Blueprint $table) {
+        Schema::table('organizational_users', function (Blueprint $table) {
             //
-            $table->unsignedBigInteger('customer_id')->constrained();
+            $table->unsignedBigInteger('customer_id')->nullable()->constrained();
 
+            // $table->foreign('customer_id')
+            // ->references('id')
+            // ->on('users')
+            // ->onDelete('cascade');
 
         });
     }

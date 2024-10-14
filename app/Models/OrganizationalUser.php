@@ -10,6 +10,10 @@ class OrganizationalUser extends Model
     use HasFactory;
 
     protected $table = 'organizational_user';
+    //Note: In this table,
+    //1. customer_id is the id of customer admin,
+    //2. user_id is the id of organizational user and
+    //3. organizational_id is the id of normal user
 
     protected $fillable = ['user_id', 'organizational_id', 'customer_id'];
 

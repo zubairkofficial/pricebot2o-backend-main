@@ -69,8 +69,8 @@ class AuthController extends Controller
                 'customer_id' => $request->creator_id,
                 'user_id' => $user->id
             ]);
-            Log::info('organizationaluser created');
-            Log::info('user id',[$user->id]);
+            Log::info('organizational user created');
+            Log::info('user id', [$user->id]);
         }
         $token = $user->createToken('user_token')->plainTextToken;
 
@@ -104,10 +104,10 @@ class AuthController extends Controller
 
 
         // Retrieve the services of the user with id = 100
-        $firstCustomerAdmin = User::with(relations: 'customerUserWithNullOrganization')->has('customerUserWithNullOrganization')->where(['is_user_customer'=>1,'org_id' => Null])->first();
+        $firstCustomerAdmin = User::with(relations: 'customerUserWithNullOrganization')->has('customerUserWithNullOrganization')->where(['is_user_customer' => 1, 'org_id' => Null])->first();
 
-        if(!isset($firstCustomerAdmin)){
-            return response()->json(['error','Something went wrong'],500);
+        if (!isset($firstCustomerAdmin)) {
+            return response()->json(['error', 'Something went wrong'], 500);
         }
         // $firstDefaultOrganization = User::where('is')
         $user100 = User::where('email', 'uwe.leven@cretschmar.de')->first();
@@ -183,10 +183,10 @@ class AuthController extends Controller
 
         $customerUser->save();
 
-        // Create a customer request for the newly registered customer
-        $customerRequest = new CustomerAdmin();
-        $customerRequest->user_id = $customerUser->id;
-        $customerRequest->save();
+        // // Create a customer request for the newly registered customer
+        // $customerRequest = new CustomerAdmin();
+        // $customerRequest->user_id = $customerUser->id;
+        // $customerRequest->save();
 
         // Generate a token for the customer user
         $token = $customerUser->createToken('user_token')->plainTextToken;
@@ -219,6 +219,68 @@ class AuthController extends Controller
             "organization_user" => $organizationUser,
             "token" => $token,
         ], 201);
+    }
+
+    public function linkUsers(Request $request)
+    {
+
+        $request->validate([
+            'customerAdminId' => 'required',
+            'organizationalUserId' => 'required',
+            'userId' => 'required|exists:users,id',
+            'services' => 'required|array',
+            'is_user_customer' => 'required',
+            'is_user_organizational' => 'required',
+        ], [
+            'customerAdminId.required' => 'Der Kunden-Admin ist erforderlich.',
+            'organizationalUserId.required' => 'Der Organisationsbenutzer ist erforderlich.',
+            'userId.required' => 'Die Benutzer-ID ist erforderlich.',
+            'userId.exists' => 'Die Benutzer-ID muss in der Benutzertabelle existieren.',
+            'services.required' => 'Der Service ist erforderlich.',
+            'services.array' => 'Der Service muss ein Array sein.',
+            'is_user_customer.required' => 'Das Feld "is_user_customer" ist erforderlich.',
+            'is_user_organizational.required' => 'Das Feld "is_user_organizational" ist erforderlich.',
+        ]);
+
+
+
+        $user = User::find($request->userId);
+
+
+        if ($request->has('services')) {
+
+            $user->services = $request->services;
+        }
+        if ($request->has('org_id')) {
+            $user->org_id = $request->org_id;
+        }
+        if ($request->has('is_user_customer')) {
+            $user->is_user_customer = $request->is_user_customer;
+        }
+        if ($request->has('is_user_organizational')) {
+            $user->is_user_organizational = $request->is_user_organizational;
+        }
+
+        $user->save();
+
+
+
+        if ($request->userId) {
+            OrganizationalUser::create([
+                'customer_id' => $request->customerAdminId,
+                'user_id' => $request->organizationalUserId,
+                'organizational_id' => $request->userId,
+            ]);
+            Log::info('User Linked Successfully.');
+            Log::info('user id', [$request->user_id]);
+        }
+
+
+        return response()->json([
+            "message" => "User Linked Successfully.",
+            "user" => $user,
+
+        ], 200);
     }
 
 
@@ -255,7 +317,7 @@ class AuthController extends Controller
             'old_password' => 'required',
             'password' => 'required|min:8|confirmed',
         ]);
-        
+
         $user = Auth::user();
 
         if (Hash::check($request->input('old_password'), $user->password)) {
@@ -292,7 +354,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'services' => 'sometimes|array',
-            'email' => 'required|email|unique:users,email,'.$id
+            'email' => 'required|email|unique:users,email,' . $id
         ], [
             'email.required' => 'Die E-Mail-Adresse ist erforderlich.',
             'email.email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
@@ -471,7 +533,10 @@ class AuthController extends Controller
     public function getNonOrganizationalUsers()
     {
         // Fetch all users who are organizational users (i.e., 'is_user_organizational' is true)
-        $usersInOrganization = User::where('is_user_organizational', null)->where('is_user_customer', null)->get();
+        $usersInOrganization = User::where('is_user_organizational', null)
+            ->where('is_user_customer', null)
+            ->where('user_type', 0)
+            ->get();
 
         // Get the service IDs from the users (assuming 'services' field contains service IDs)
         $serviceIds = $usersInOrganization->pluck('services')->flatten()->unique();
@@ -511,7 +576,6 @@ class AuthController extends Controller
             'all_users' => $usersWithServiceNames,
         ], 200);
     }
-
 
     public function organizationalUserWithCustomerAdmins()
     {
@@ -562,12 +626,13 @@ class AuthController extends Controller
 
 
 
-    private function countToolDocument($organizationId){
-        $normalUsers = OrganizationalUser::where('user_id',$organizationId)->pluck('organizational_id')->toArray();
+    private function countToolDocument($organizationId)
+    {
+        $normalUsers = OrganizationalUser::where('user_id', $organizationId)->pluck('organizational_id')->toArray();
 
-        $dataProcessCount = DataProcess::whereIn('user_id',$normalUsers)->count();
-        $documentsCount = Document::whereIn('user_id',$normalUsers)->count();
-        $contractSolutionCount = ContractSolutions::whereIn('user_id',$normalUsers)->count();
+        $dataProcessCount = DataProcess::whereIn('user_id', $normalUsers)->count();
+        $documentsCount = Document::whereIn('user_id', $normalUsers)->count();
+        $contractSolutionCount = ContractSolutions::whereIn('user_id', $normalUsers)->count();
         $allCount = $dataProcessCount + $documentsCount + $contractSolutionCount;
 
         return [
@@ -623,7 +688,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'services' => $userServiceNames,
-                'serviceIds'=> collect($user->services),
+                'serviceIds' => collect($user->services),
                 'dataProcessCount' => $documents['dataProcessCount'],
                 'documentsCount' => $documents['documentsCount'],
                 'contractSolutionCount' => $documents['contractSolutionCount'],

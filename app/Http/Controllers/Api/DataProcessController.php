@@ -25,7 +25,7 @@ class DataProcessController extends Controller
 
         foreach ($request->file('documents') as $file) {
             $fileName = $file->getClientOriginalName();
-            $url = 'http://dhn.services/datasheet_process';
+            $url = 'http://20.218.155.138/datasheet_process';
 
 
             $username = 'api_user';

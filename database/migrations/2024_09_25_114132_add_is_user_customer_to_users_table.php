@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->boolean('is_user_customer');
+            $table->boolean('is_user_customer')->nullable();
 
 
         });
