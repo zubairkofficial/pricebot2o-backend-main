@@ -8,6 +8,7 @@ use App\Models\ContractSolutions;
 use App\Models\CustomerAdmin;
 use App\Models\DataProcess;
 use App\Models\Document;
+use App\Models\FreeDataProcess;
 use App\Models\Organization;
 use App\Models\CustomerRequest;
 use App\Models\Service;
@@ -102,22 +103,31 @@ class AuthController extends Controller
             'password.min' => 'Das Passwort muss mindestens 8 Zeichen lang sein.',
         ]);
 
-
         // Retrieve the services of the user with id = 100
-        $firstCustomerAdmin = User::with(relations: 'customerUserWithNullOrganization')->has('customerUserWithNullOrganization')->where(['is_user_customer' => 1, 'org_id' => Null])->first();
+        $firstCustomerAdmin = User::with('customerUserWithNullOrganization')
+            ->has('customerUserWithNullOrganization')
+            ->where(['is_user_customer' => 1, 'org_id' => null])
+            ->first();
 
         if (!isset($firstCustomerAdmin)) {
-            return response()->json(['error', 'Something went wrong'], 500);
+            return response()->json(['error' => 'Something went wrong'], 500);
         }
-        // $firstDefaultOrganization = User::where('is')
-        $user100 = User::where('email', 'uwe.leven@cretschmar.de')->first();
 
+        $user100 = User::where('email', 'uwe.leven@cretschmar.de')->first();
 
         // Create a new user
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->services = $user100->services; // Assign the services from user 100
+
+        // Get the existing services from user100 and ensure service ID 5 is added
+        $services = $user100->services; // Assuming this is an array
+        if (!in_array(5, $services)) {
+            $services[] = 5; // Add service ID 5 if not already present
+        }
+
+        $user->services = $services; // Assign updated services array
+
         $user->org_id = $user100->org_id;
         $user->is_user_organizational = 0;
         $user->password = Hash::make($request->password);
@@ -141,6 +151,7 @@ class AuthController extends Controller
             "token" => $token,
         ], 201);
     }
+
 
 
     public function registerCustomerByAdmin(Request $request)
@@ -633,12 +644,15 @@ class AuthController extends Controller
         $dataProcessCount = DataProcess::whereIn('user_id', $normalUsers)->count();
         $documentsCount = Document::whereIn('user_id', $normalUsers)->count();
         $contractSolutionCount = ContractSolutions::whereIn('user_id', $normalUsers)->count();
-        $allCount = $dataProcessCount + $documentsCount + $contractSolutionCount;
+
+        $freeDataProcessCount = FreeDataProcess::whereIn('user_id', $normalUsers)->count();
+        $allCount = $dataProcessCount + $documentsCount + $contractSolutionCount + $freeDataProcessCount;
 
         return [
             'dataProcessCount' => $dataProcessCount,
             'documentsCount' => $documentsCount,
             'contractSolutionCount' => $contractSolutionCount,
+            'freeDataProcessCount' => $freeDataProcessCount,
             'allCount' => $allCount,
         ];
 
@@ -692,6 +706,7 @@ class AuthController extends Controller
                 'dataProcessCount' => $documents['dataProcessCount'],
                 'documentsCount' => $documents['documentsCount'],
                 'contractSolutionCount' => $documents['contractSolutionCount'],
+                'freeDataProcessCount' => $documents['freeDataProcessCount'],
                 'allCount' => $documents['allCount'],
                 'organization_name' => $organizationNames->get($user->org_id),
                 'is_user_organizational' => $user->is_user_organizational, // Add this field

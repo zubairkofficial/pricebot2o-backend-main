@@ -57,6 +57,13 @@ class UsageController extends Controller
             $responseData['data_process_count'] = $dataProcessCount;
         }
 
+        // Check if the user has access to the data process tool
+        if (in_array('5', $userServices)) {
+            // Count the data processes associated with the user
+            $freeDataProcessCount = $user->freedataprocesses()->count();
+            $responseData['free_data_process_count'] = $freeDataProcessCount;
+        }
+
         // Return the filtered usage data based on available tools
         return response()->json($responseData);
     }

@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\Api\FreeDataProcessController;
 use App\Http\Controllers\CustomerRequestController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
@@ -103,6 +104,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     // DataProcess
     Route::post('/data-process', [DataProcessController::class, 'fetchDataProcess']);
+    Route::post('/freeDataProcess', [FreeDataProcessController::class, 'fetchFreeDataProcess']);
 
     // logo setting
 

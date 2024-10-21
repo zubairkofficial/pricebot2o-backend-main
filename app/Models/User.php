@@ -77,6 +77,11 @@ class User extends Authenticatable
         return $this->hasMany(DataProcess::class, 'user_id');
     }
 
+    public function freedataprocesses()
+    {
+        return $this->hasMany(FreeDataProcess::class, 'user_id');
+    }
+
     public function customerUsers()
     {
         return $this->hasMany(OrganizationalUser::class, 'customer_id')->with('organizational');
