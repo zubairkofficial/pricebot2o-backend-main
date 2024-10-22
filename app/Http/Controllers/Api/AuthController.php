@@ -9,6 +9,7 @@ use App\Models\CustomerAdmin;
 use App\Models\DataProcess;
 use App\Models\Document;
 use App\Models\FreeDataProcess;
+use App\Models\LogoSetting;
 use App\Models\Organization;
 use App\Models\CustomerRequest;
 use App\Models\Service;
@@ -81,7 +82,6 @@ class AuthController extends Controller
             "token" => $token,
         ], 200);
     }
-
     public function registerCustomer(Request $request)
     {
         // Validate the request input
@@ -121,10 +121,7 @@ class AuthController extends Controller
         $user->email = $request->email;
 
         // Get the existing services from user100 and ensure service ID 5 is added
-        $services = $user100->services; // Assuming this is an array
-        if (!in_array(5, $services)) {
-            $services[] = 5; // Add service ID 5 if not already present
-        }
+        $services[] = 5; // Assuming this is an array
 
         $user->services = $services; // Assign updated services array
 
@@ -139,6 +136,12 @@ class AuthController extends Controller
             'user_id' => $firstCustomerAdmin->customerUserWithNullOrganization->user_id,
             'customer_id' => $user100->id,
             'organizational_id' => $user->id,
+        ]);
+
+        LogoSetting::create([
+            'user_id'=> $user->id,
+            'logo'=> 'logos/1727182162.svg',
+
         ]);
 
         // Generate a token for the newly registered user
